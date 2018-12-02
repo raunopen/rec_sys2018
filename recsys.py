@@ -118,7 +118,6 @@ for i, row in enumerate(data):
 user_list=[]
 for i in dataset.index:
     user_list.append(i)
-print(user_list)
 print("-= SUPER MOVIE RECOMMENDER v1.0 =-")
 print("Give a valid user ID to get movie recommendations for that user.")
 print("Write 'exit' when you wish to exit the program.\n")
