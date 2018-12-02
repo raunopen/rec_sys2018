@@ -1,15 +1,29 @@
 #TIETS43 RECOMMENDER SYSTEMS 2018 group work
 #Aki Lempola & Rauno Pennanen
 import pandas as pd
+import csv
 from scipy.stats import pearsonr
 
-
+MIN_SAMPLE_SIZE = 10
 dataset=pd.read_csv('dataset.csv',index_col=0)
 # rows = users, (row = userId -1 )
 # cols = movies (col = movieId -1 )
 data = dataset.values
-user = 0
+movie_ids = dataset.columns
 
+
+movie_names = {}
+with open('movies.csv', 'r') as rfile:
+    reader = csv.reader(rfile)
+    lineCount = 0
+    for row in reader:
+        if lineCount == 0:
+            lineCount += 1
+        else:
+            key = int(row[0])
+            value = row[1]
+            movie_names[key] = value
+            lineCount += 1
 
 # returns set of cols rated by the user
 def movies_rated_by(user):
@@ -29,7 +43,7 @@ def rated_same_movies(user):
         if i != user :
             mIds = movies_rated_by(i)
             mIds = movies.intersection(mIds)
-            size = 25 # min sample size for pearson correlation
+            size = MIN_SAMPLE_SIZE # min sample size for pearson correlation
             if len( mIds ) > size : users.append( (i,mIds) )
     return users
 
@@ -63,12 +77,46 @@ def pearson_similarity(user, users, n):
     result = sorted(result.items(), key=lambda x: x[1], reverse=True)
     return result[:n]
 
+def predict(user, simUsers):
+    movies = set()
+    # set of movies rated by sim users
+    for user_id, pearson in simUsers:
+        movies = movies.union( movies_rated_by(user_id) )
+    # remove movies allready rated by the user
+    movies = movies.difference( movies_rated_by(user) )
+    
+    user_mean = user_mean_rating[user]
+    predicted = {}
+    for movie in movies:
+        r = 0.0 # predicted movie rating
+        p_sum = 0.0
+        for user_id, pearson in simUsers:
+            mean = user_mean_rating[ user_id ]
+            rating = data[user_id][movie]
+            if rating >= 0:
+                r += (rating - mean) * pearson
+            p_sum += pearson
+        
+        predicted[movie] = user_mean + (r / p_sum )
+    result = sorted(predicted.items(), key=lambda x: x[1], reverse=True)
+    for i, r in result[:5]:
+        m_id = int(movie_ids[i])
+        print(movie_names[m_id], r)
+        # TODO return list of movie ids, instead of printing
 
-# TODO recommend movies from simUsers
 
 # TODO User interace
 
-user = 0 # test user id
+# mean ratings for the users 
+user_mean_rating = []
+for i, row in enumerate(data):
+    movies = movies_rated_by(i)
+    n = len(movies)
+    summ = float( sum( get_ratings(i, movies) ))
+    user_mean_rating.append( summ / n )
+
+
+user = 224 # test user id
 simUsers = pearson_similarity(user, rated_same_movies(user), 20)
-for user, correlation in simUsers:
-    print(user, correlation)
+
+predict(user, simUsers)
