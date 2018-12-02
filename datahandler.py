@@ -36,7 +36,7 @@ for row in ratings:
   except ValueError:
     pass
 dlist.append(d)
-print(dlist[0])
+
 #add a -1 to signify a missing value into a list of dictionaries
 endres=[]
 d={}
@@ -62,5 +62,5 @@ for i in range(0,len(dlist)):
 
 df=pd.DataFrame(endres)
 df.index+=1
-#print(df)
+
 df.to_csv('dataset.csv')

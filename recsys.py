@@ -11,7 +11,6 @@ dataset=pd.read_csv('dataset.csv',index_col=0)
 data = dataset.values
 movie_ids = dataset.columns
 
-
 movie_names = {}
 with open('movies.csv', 'r') as rfile:
     reader = csv.reader(rfile)
@@ -56,7 +55,6 @@ def get_ratings(user, ids):
         ratings.append(data[user][i])
     return ratings
         
-
 # param user: user id
 #      users: set of userIds
 #          n: return top n similar usersIds:
@@ -104,9 +102,6 @@ def predict(user, simUsers):
         print(movie_names[m_id], r)
         # TODO return list of movie ids, instead of printing
 
-
-# TODO User interace
-
 # mean ratings for the users 
 user_mean_rating = []
 for i, row in enumerate(data):
@@ -115,8 +110,31 @@ for i, row in enumerate(data):
     summ = float( sum( get_ratings(i, movies) ))
     user_mean_rating.append( summ / n )
 
+#user = 224 # test user id
+#simUsers = pearson_similarity(user, rated_same_movies(user), 20)
+#predict(user, simUsers)
 
-user = 224 # test user id
-simUsers = pearson_similarity(user, rated_same_movies(user), 20)
-
-predict(user, simUsers)
+# user interface
+user_list=[]
+for i in dataset.index:
+    user_list.append(i)
+print(user_list)
+print("-= SUPER MOVIE RECOMMENDER v1.0 =-")
+print("Give a valid user ID to get movie recommendations for that user.")
+print("Write 'exit' when you wish to exit the program.\n")
+while True:
+    user=input("Give user ID (or write 'exit' to quit): ")
+    try:
+        if user=='exit':
+            print('\nExiting program...')
+            break
+        user=int(user)
+        if user in user_list:
+            print('The top 5 movie recommendations for user {}:\n'.format(user))
+            simUsers = pearson_similarity(user, rated_same_movies(user), 20)
+            predict(user, simUsers)
+            print()
+        else:
+            print("\nERROR - User not found.\nPlease try again.\n")
+    except (ValueError, NameError):
+        print("\nERROR - User not found.\nPlease try again.\n")
