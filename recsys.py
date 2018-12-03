@@ -130,8 +130,8 @@ while True:
         user=int(user)
         if user in user_list:
             print('The top 5 movie recommendations for user {}:\n'.format(user))
-            simUsers = pearson_similarity(user, rated_same_movies(user), 20)
-            predict(user, simUsers)
+            simUsers = pearson_similarity(user-1, rated_same_movies(user-1), 20)
+            predict(user-1, simUsers)
             print()
         else:
             print("\nERROR - User not found.\nPlease try again.\n")
